@@ -1,9 +1,31 @@
-﻿int g = 10;
+﻿int globalVar = 100;
+
+void testScope() {
+    int x = 5;
+    if (x > 0) {
+        int y = 10;
+        y = y + 1;
+    }
+}
+
+int factorial(int n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+int add(int a, int b) {
+    return a + b;
+}
 
 void main() {
-    int x = 5;
+    int result = 0;
+    int i;
     
-    if (x < 10) {
-        x = x + g;
+    for (i = 0; i < 5; i++) {
+        result = add(result, 10);
     }
+    
+    int factRes = factorial(5);
 }

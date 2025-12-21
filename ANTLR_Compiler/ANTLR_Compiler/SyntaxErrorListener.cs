@@ -1,16 +1,20 @@
 ﻿using Antlr4.Runtime;
 using System.Collections.Generic;
-using System.IO;
 
-public class SyntaxErrorListener : BaseErrorListener, IAntlrErrorListener<int>
+namespace ANTLR_Compiler
 {
-    public List<string> Errors = new List<string>();
-    public override void SyntaxError(IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+    public class SyntaxErrorListener : BaseErrorListener, IAntlrErrorListener<int>
     {
-        Errors.Add($"Eroare Sintactica la linia {line}:{charPositionInLine} - {msg}");
-    }
-    public void SyntaxError(IRecognizer recognizer, int offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
-    {
-        Errors.Add($"Eroare Lexicala la linia {line}:{charPositionInLine} - {msg}");
+        public List<string> Errors = new List<string>();
+
+        public override void SyntaxError(IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+        {
+            Errors.Add($"Syntax error at line {line}:{charPositionInLine} - {msg}");
+        }
+
+        public void SyntaxError(IRecognizer recognizer, int offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+        {
+            Errors.Add($"Lexical error at line {line}:{charPositionInLine} - {msg}");
+        }
     }
 }

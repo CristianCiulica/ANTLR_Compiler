@@ -11,7 +11,7 @@ class Program
         string inputFile = "input.txt";
         if (!File.Exists(inputFile))
         {
-            Console.WriteLine("Eroare: Fisierul 'input.txt' lipseste.");
+            Console.WriteLine("Error: File 'input.txt' not found.");
             return;
         }
 
@@ -48,31 +48,41 @@ class Program
         AnalysisVisitor visitor = new AnalysisVisitor();
         visitor.Visit(tree);
 
+        int mainCount = visitor.Functions.Count(f => f.IsMain);
+        if (mainCount == 0)
+        {
+            visitor.SemanticErrors.Add("Error: No 'main' function found.");
+        }
+        else if (mainCount > 1)
+        {
+            visitor.SemanticErrors.Add("Error: Too many 'main' functions.");
+        }
+
         using (StreamWriter sw = new StreamWriter("global_vars.txt"))
         {
             foreach (var v in visitor.GlobalVars)
-                sw.WriteLine($"Variabila: {v.Name} | Tip: {v.Type} | Init: {v.InitValue}");
+                sw.WriteLine($"Variable: {v.Name} | Type: {v.Type} | Init: {v.InitValue}");
         }
 
         using (StreamWriter sw = new StreamWriter("functions.txt"))
         {
             foreach (var f in visitor.Functions)
             {
-                string tipF = f.IsMain ? "MAIN" : (f.IsRecursive ? "RECURSIVA" : "ITERATIVA");
-                sw.WriteLine($"Nume: {f.Name}");
-                sw.WriteLine($"   Tip Functie: {tipF}");
-                sw.WriteLine($"   Returnat: {f.Type}");
+                string tipF = f.IsMain ? "MAIN" : (f.IsRecursive ? "RECURSIVE" : "ITERATIVE");
+                sw.WriteLine($"Name: {f.Name}");
+                sw.WriteLine($"   Type: {tipF}");
+                sw.WriteLine($"   Returns: {f.Type}");
 
                 string paramStr = string.Join(", ", f.Parameters.Select(p => $"{p.Type} {p.Name}"));
-                sw.WriteLine($"   Parametri: [{paramStr}]");
+                sw.WriteLine($"   Params: [{paramStr}]");
 
-                sw.WriteLine("   Variabile Locale:");
-                if (f.LocalVars.Count == 0) sw.WriteLine("      (niciuna)");
+                sw.WriteLine("   Local Vars:");
+                if (f.LocalVars.Count == 0) sw.WriteLine("      (none)");
                 foreach (var l in f.LocalVars)
                     sw.WriteLine($"      {l.Type} {l.Name} = {l.InitValue}");
 
-                sw.WriteLine("   Structuri Control:");
-                if (f.ControlStructures.Count == 0) sw.WriteLine("      (niciuna)");
+                sw.WriteLine("   Control Structures:");
+                if (f.ControlStructures.Count == 0) sw.WriteLine("      (none)");
                 foreach (var c in f.ControlStructures)
                     sw.WriteLine($"      {c}");
 
@@ -84,24 +94,26 @@ class Program
         {
             if (errorListener.Errors.Count == 0 && visitor.SemanticErrors.Count == 0)
             {
-                sw.WriteLine("Fara erori");
+                sw.WriteLine("No errors found.");
             }
             else
             {
                 if (errorListener.Errors.Count > 0)
                 {
-                    sw.WriteLine("=== Erori Lexicale si Sintactice ===");
+                    sw.WriteLine("=== Syntax/Lexical Errors ===");
                     foreach (var e in errorListener.Errors) sw.WriteLine(e);
                 }
 
                 if (visitor.SemanticErrors.Count > 0)
                 {
-                    sw.WriteLine("\n=== Erori Semantice ===");
+                    sw.WriteLine("\n=== Semantic Errors ===");
                     foreach (var e in visitor.SemanticErrors) sw.WriteLine(e);
                 }
             }
         }
 
-        Console.WriteLine("Procesare completa! Verifica .txt");
+        Console.WriteLine(" Complete. Check the generated txt files ");
+        if (errorListener.Errors.Count > 0 || visitor.SemanticErrors.Count > 0)
+            Console.WriteLine("Errors found");
     }
 }
